@@ -7,6 +7,7 @@ interface ToolbarProps {
   onToolChange: (tool: Tool) => void;
   isOpen: boolean;
   toggleOpen: () => void;
+  onAddPlayer: () => void;  // Add your callback here
 }
 
 const tools: { label: string; value: Tool }[] = [
@@ -16,27 +17,31 @@ const tools: { label: string; value: Tool }[] = [
   { label: "Erase", value: "erase" },
 ];
 
-const Toolbar: React.FC<ToolbarProps> = ({ activeTool, onToolChange, isOpen, toggleOpen }) => {
-    return (
-        <>
-            {/* Toggle button */}
-          <button
-  className={`fixed top-1/2 left-0 transform -translate-y-1/2 p-0 bg-transparent rounded-none transition-all duration-300 z-50 ${
-    isOpen ? "left-20" : "left-0"
-  }`}
-  onClick={toggleOpen}
-  aria-label="Toggle toolbar"
-  style={{
-    width: 0,
-    height: 0,
-    borderTop: "20px solid transparent",    // doubled size (10px -> 20px)
-    borderBottom: "20px solid transparent",
-    borderRight: isOpen ? "20px solid #1F2937" : "none",  // invert triangles here
-    borderLeft: isOpen ? "none" : "20px solid #1F2937",
-  }}
-></button>
-
-
+const Toolbar: React.FC<ToolbarProps> = ({
+  activeTool,
+  onToolChange,
+  isOpen,
+  toggleOpen,
+  onAddPlayer,
+}) => {
+  return (
+    <>
+      {/* Toggle button */}
+      <button
+        className={`fixed top-1/2 left-0 transform -translate-y-1/2 p-0 bg-transparent rounded-none transition-all duration-300 z-50 ${
+          isOpen ? "left-20" : "left-0"
+        }`}
+        onClick={toggleOpen}
+        aria-label="Toggle toolbar"
+        style={{
+          width: 0,
+          height: 0,
+          borderTop: "20px solid transparent",
+          borderBottom: "20px solid transparent",
+          borderRight: isOpen ? "20px solid #1F2937" : "none",
+          borderLeft: isOpen ? "none" : "20px solid #1F2937",
+        }}
+      ></button>
 
       {/* Sidebar drawer */}
       <div
@@ -48,7 +53,9 @@ const Toolbar: React.FC<ToolbarProps> = ({ activeTool, onToolChange, isOpen, tog
           <button
             key={value}
             className={`w-12 h-12 rounded ${
-              activeTool === value ? "bg-blue-600" : "bg-gray-700 hover:bg-gray-600"
+              activeTool === value
+                ? "bg-blue-600"
+                : "bg-gray-700 hover:bg-gray-600"
             } focus:outline-none`}
             onClick={() => onToolChange(value)}
             title={label}
@@ -56,6 +63,15 @@ const Toolbar: React.FC<ToolbarProps> = ({ activeTool, onToolChange, isOpen, tog
             {label[0]}
           </button>
         ))}
+
+        {/* Add Player button */}
+        <button
+          onClick={onAddPlayer}
+          className="w-full mt-auto bg-green-600 hover:bg-green-700 py-2 rounded text-white"
+          title="Add Player"
+        >
+          +
+        </button>
       </div>
     </>
   );
