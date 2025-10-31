@@ -11,7 +11,7 @@ interface Player {
 
 interface PitchProps {
   players: Player[];
-  setPlayers: React.Dispatch<React.SetStateAction<Player[]>>;
+  setPlayers: (id: number, x: number, y: number) => void; // updated to expect this signature
   activeTool: "select" | "draw" | "arrow" | "erase";
 }
 
@@ -50,9 +50,7 @@ const Pitch: React.FC<PitchProps> = ({ players, setPlayers, activeTool }) => {
   const handleDragMove = (id: number, e: any) => {
     if (activeTool !== "select") return;
     const { x, y } = e.target.position();
-    setPlayers((players) =>
-      players.map((p) => (p.id === id ? { ...p, x, y } : p))
-    );
+    setPlayers(id, x, y);
   };
 
   const handleMouseDown = (e: any) => {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Toolbar from "./Toolbar";
 import "./index.css";
 import Pitch from "./Pitch";
@@ -9,28 +9,51 @@ function App() {
   >("select");
   const [isToolbarOpen, setIsToolbarOpen] = useState(false);
 
-  const [players, setPlayers] = useState([
-    { id: 1, x: 200, y: 300, color: "red", label: "1" },
-    { id: 2, x: 400, y: 200, color: "red", label: "2" },
-  ]);
+  const [players, setPlayers] = useState<Player[]>([]);
 
-  // Generate unique IDs for new players
-  const generateUniqueId = () => {
-    if (players.length === 0) return 1;
-    return Math.max(...players.map((p) => p.id)) + 1;
+  // Fetch all players from backend on mount
+  useEffect(() => {
+    fetch("http://localhost:8000/api/players")
+      .then((res) => res.json())
+      .then((data) => setPlayers(data))
+      .catch(console.error);
+  }, []);
+
+  // Add new player on backend and update frontend
+  interface Player {
+  id: number;
+  x: number;
+  y: number;
+  color: string;
+  label: string;
+}
+ 
+
+
+  const addPlayer = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/players/new", {
+        method: "POST",
+      });
+      if (!response.ok) throw new Error("Failed to add player");
+      const newPlayer = await response.json();
+      setPlayers((prev) => [...prev, newPlayer]);
+    } catch (error) {
+      console.error("Add player error:", error);
+    }
   };
 
-  // Add player handler
-  const addPlayer = () => {
-    const newId = generateUniqueId();
-    const newPlayer = {
-      id: newId,
-      x: 300,
-      y: 300,
-      color: "red",
-      label: newId.toString(),
-    };
-    setPlayers([...players, newPlayer]);
+  // Update player position locally and sync with backend
+  const setPlayerPosition = (id: number, x: number, y: number) =>{
+    setPlayers((players) =>
+      players.map((p) => (p.id === id ? { ...p, x, y } : p))
+    );
+
+    fetch(`http://localhost:8000/api/players/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ x, y }),
+    }).catch((e) => console.error("Update player error:", e));
   };
 
   return (
@@ -48,7 +71,11 @@ function App() {
         } p-4`}
       >
         <p>Selected tool: {activeTool}</p>
-        <Pitch players={players} setPlayers={setPlayers} activeTool={activeTool} />
+        <Pitch
+          players={players}
+          setPlayers={setPlayerPosition}
+          activeTool={activeTool}
+        />
       </main>
     </div>
   );
