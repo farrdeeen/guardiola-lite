@@ -11,11 +11,19 @@ interface Player {
 
 interface PitchProps {
   players: Player[];
-  setPlayers: (id: number, x: number, y: number) => void; // updated to expect this signature
+  setPlayers: (id: number, x: number, y: number) => void;
   activeTool: "select" | "draw" | "arrow" | "erase";
+  selectedPlayerId: number | null;
+  onSelectPlayer: (id: number) => void;
 }
 
-const Pitch: React.FC<PitchProps> = ({ players, setPlayers, activeTool }) => {
+const Pitch: React.FC<PitchProps> = ({
+  players,
+  setPlayers,
+  activeTool,
+  selectedPlayerId,
+  onSelectPlayer,
+}) => {
   const [size, setSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -71,7 +79,9 @@ const Pitch: React.FC<PitchProps> = ({ players, setPlayers, activeTool }) => {
       (p) => Math.hypot(pointer.x - p.x, pointer.y - p.y) < 28
     );
 
-    setCursor(isOverPlayer ? "pointer" : activeTool === "draw" ? "crosshair" : "default");
+    setCursor(
+      isOverPlayer ? "pointer" : activeTool === "draw" ? "crosshair" : "default"
+    );
 
     if (!drawing) return;
 
@@ -199,10 +209,11 @@ const Pitch: React.FC<PitchProps> = ({ players, setPlayers, activeTool }) => {
                 y={player.y}
                 radius={28}
                 fill={player.color}
+                stroke={player.id === selectedPlayerId ? "yellow" : "white"}
+                strokeWidth={player.id === selectedPlayerId ? 5 : 3}
                 draggable={activeTool === "select"}
                 onDragMove={(e) => handleDragMove(player.id, e)}
-                stroke="white"
-                strokeWidth={3}
+                onClick={() => onSelectPlayer(player.id)}
                 onMouseEnter={() => setCursor("pointer")}
                 onMouseLeave={() => setCursor("default")}
               />

@@ -1,13 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getHexColor } from "./colorUtils";  // Import utility
 
 type Tool = "select" | "draw" | "arrow" | "erase";
+
+interface Player {
+  id: number;
+  label: string;
+  color: string;
+}
 
 interface ToolbarProps {
   activeTool: Tool;
   onToolChange: (tool: Tool) => void;
   isOpen: boolean;
   toggleOpen: () => void;
-  onAddPlayer: () => void;  // Add your callback here
+  onAddPlayer: () => void;
+  selectedPlayerId: number | null;
+  onDeletePlayer: (id: number) => void;
+  onChangeColor: (id: number, color: string) => void;
+  players: Player[];
 }
 
 const tools: { label: string; value: Tool }[] = [
@@ -23,10 +34,25 @@ const Toolbar: React.FC<ToolbarProps> = ({
   isOpen,
   toggleOpen,
   onAddPlayer,
+  selectedPlayerId,
+  onDeletePlayer,
+  onChangeColor,
+  players,
 }) => {
+  const [color, setColor] = useState<string>("");
+
+  useEffect(() => {
+    if (selectedPlayerId !== null) {
+      const player = players.find((p) => p.id === selectedPlayerId);
+      if (player) setColor(player.color);
+      else setColor("");
+    } else {
+      setColor("");
+    }
+  }, [selectedPlayerId, players]);
+
   return (
     <>
-      {/* Toggle button */}
       <button
         className={`fixed top-1/2 left-0 transform -translate-y-1/2 p-0 bg-transparent rounded-none transition-all duration-300 z-50 ${
           isOpen ? "left-20" : "left-0"
@@ -43,11 +69,10 @@ const Toolbar: React.FC<ToolbarProps> = ({
         }}
       ></button>
 
-      {/* Sidebar drawer */}
       <div
         className={`fixed top-0 left-0 h-full bg-gray-900 text-white p-4 space-y-4 transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } w-20 flex flex-col items-center`}
+        } w-40 flex flex-col items-center`}
       >
         {tools.map(({ label, value }) => (
           <button
@@ -64,14 +89,38 @@ const Toolbar: React.FC<ToolbarProps> = ({
           </button>
         ))}
 
-        {/* Add Player button */}
         <button
           onClick={onAddPlayer}
-          className="w-full mt-auto bg-green-600 hover:bg-green-700 py-2 rounded text-white"
+          className="w-full bg-green-600 hover:bg-green-700 py-2 rounded text-white"
           title="Add Player"
         >
-          +
+          + Player
         </button>
+
+        {selectedPlayerId !== null && (
+          <div className="mt-4 w-full">
+            <p className="mb-2 font-semibold">Selected Player</p>
+            <button
+              className="w-full mb-2 bg-red-600 hover:bg-red-700 py-1 rounded text-white"
+              onClick={() => onDeletePlayer(selectedPlayerId)}
+            >
+              Delete Player
+            </button>
+
+            <label className="block mb-1">Change Color:</label>
+            <input
+              type="color"
+              value={color}
+              onChange={(e) => {
+                const newColor = e.target.value;
+                setColor(newColor);
+                onChangeColor(selectedPlayerId, newColor);
+                console.log("Current color input value:", newColor);
+              }}
+              className="w-full h-8 cursor-pointer rounded border-none"
+            />
+          </div>
+        )}
       </div>
     </>
   );
