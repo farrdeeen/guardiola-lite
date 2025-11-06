@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Stage, Layer, Line, Circle, Rect, Text } from "react-konva";
 
 interface Player {
@@ -17,31 +17,15 @@ interface PitchProps {
   onSelectPlayer: (id: number) => void;
 }
 
-const Pitch: React.FC<PitchProps> = ({
-  players,
-  setPlayers,
-  activeTool,
-  selectedPlayerId,
-  onSelectPlayer,
-}) => {
-  const [size, setSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
-
+const Pitch: React.FC<PitchProps> = ({ players, setPlayers, activeTool, selectedPlayerId, onSelectPlayer }) => {
+  const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [lines, setLines] = useState<{ points: number[] }[]>([]);
   const [drawing, setDrawing] = useState(false);
   const [cursor, setCursor] = useState("crosshair");
-
   const stageRef = useRef<any>(null);
 
   useEffect(() => {
-    const handleResize = () => {
-      setSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
+    const handleResize = () => setSize({ width: window.innerWidth, height: window.innerHeight });
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -75,13 +59,9 @@ const Pitch: React.FC<PitchProps> = ({
     if (!stage) return;
     const pointer = stage.getPointerPosition();
     if (!pointer) return;
-    const isOverPlayer = players.some(
-      (p) => Math.hypot(pointer.x - p.x, pointer.y - p.y) < 28
-    );
+    const isOverPlayer = players.some((p) => Math.hypot(pointer.x - p.x, pointer.y - p.y) < 28);
 
-    setCursor(
-      isOverPlayer ? "pointer" : activeTool === "draw" ? "crosshair" : "default"
-    );
+    setCursor(isOverPlayer ? "pointer" : activeTool === "draw" ? "crosshair" : "default");
 
     if (!drawing) return;
 
@@ -92,24 +72,11 @@ const Pitch: React.FC<PitchProps> = ({
     });
   };
 
-  const handleMouseUp = () => {
-    setDrawing(false);
-  };
-
+  const handleMouseUp = () => setDrawing(false);
   const eraseLines = () => setLines([]);
 
   return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-        margin: 0,
-        padding: 0,
-        background: "white",
-        cursor: cursor,
-      }}
-    >
+    <div style={{ width: "100vw", height: "100vh", overflow: "hidden", margin: 0, padding: 0, background: "white", cursor }}>
       <button
         style={{
           position: "absolute",
@@ -129,76 +96,19 @@ const Pitch: React.FC<PitchProps> = ({
         Eraser
       </button>
 
-      <Stage
-        ref={stageRef}
-        width={width}
-        height={height}
-        style={{ display: "block", cursor }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-      >
+      <Stage ref={stageRef} width={width} height={height} style={{ display: "block", cursor }} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
         <Layer>
           {/* Pitch */}
-          <Rect
-            x={startX}
-            y={startY}
-            width={pitchWidth}
-            height={pitchHeight}
-            stroke="white"
-            strokeWidth={3}
-            fill="#228B22"
-          />
-          <Line
-            points={[
-              startX + pitchWidth / 2,
-              startY,
-              startX + pitchWidth / 2,
-              startY + pitchHeight,
-            ]}
-            stroke="white"
-            strokeWidth={2}
-          />
-          <Circle
-            x={startX + pitchWidth / 2}
-            y={startY + pitchHeight / 2}
-            radius={pitchHeight / 6}
-            stroke="white"
-            strokeWidth={2}
-          />
-          <Circle
-            x={startX + pitchWidth / 2}
-            y={startY + pitchHeight / 2}
-            radius={5}
-            fill="white"
-          />
-          <Rect
-            x={startX}
-            y={startY + (pitchHeight - goalHeight) / 2}
-            width={goalWidth}
-            height={goalHeight}
-            stroke="white"
-            strokeWidth={2}
-          />
-          <Rect
-            x={startX + pitchWidth - goalWidth}
-            y={startY + (pitchHeight - goalHeight) / 2}
-            width={goalWidth}
-            height={goalHeight}
-            stroke="white"
-            strokeWidth={2}
-          />
+          <Rect x={startX} y={startY} width={pitchWidth} height={pitchHeight} stroke="white" strokeWidth={3} fill="#228B22" />
+          <Line points={[startX + pitchWidth / 2, startY, startX + pitchWidth / 2, startY + pitchHeight]} stroke="white" strokeWidth={2} />
+          <Circle x={startX + pitchWidth / 2} y={startY + pitchHeight / 2} radius={pitchHeight / 6} stroke="white" strokeWidth={2} />
+          <Circle x={startX + pitchWidth / 2} y={startY + pitchHeight / 2} radius={5} fill="white" />
+          <Rect x={startX} y={startY + (pitchHeight - goalHeight) / 2} width={goalWidth} height={goalHeight} stroke="white" strokeWidth={2} />
+          <Rect x={startX + pitchWidth - goalWidth} y={startY + (pitchHeight - goalHeight) / 2} width={goalWidth} height={goalHeight} stroke="white" strokeWidth={2} />
 
           {/* Lines */}
           {lines.map((line, i) => (
-            <Line
-              key={i}
-              points={line.points}
-              stroke="yellow"
-              strokeWidth={4}
-              lineCap="round"
-              lineJoin="round"
-            />
+            <Line key={i} points={line.points} stroke="yellow" strokeWidth={4} lineCap="round" lineJoin="round" />
           ))}
 
           {/* Players */}
@@ -217,15 +127,7 @@ const Pitch: React.FC<PitchProps> = ({
                 onMouseEnter={() => setCursor("pointer")}
                 onMouseLeave={() => setCursor("default")}
               />
-              <Text
-                x={player.x - 10}
-                y={player.y - 10}
-                text={player.label}
-                fontSize={24}
-                fill="white"
-                fontStyle="bold"
-                listening={false}
-              />
+              <Text x={player.x - 10} y={player.y - 10} text={player.label} fontSize={24} fill="white" fontStyle="bold" listening={false} />
             </React.Fragment>
           ))}
         </Layer>
